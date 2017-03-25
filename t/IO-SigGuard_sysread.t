@@ -12,27 +12,27 @@ plan tests => 1;
 #NB: not 'IGNORE'
 $SIG{'USR1'} = sub {};
 
-my ($cr, $pw);
+my ($pr, $cw);
 
-pipe( $cr, $pw ) or die $!;
+pipe( $pr, $cw ) or die $!;
 
 my $pid = fork;
 die $! if !defined $pid;
 $pid or do {
-    close $pw or die;
+    close $pr;
 
     my $ppid = getppid;
 
-    $cr->blocking(0);
+    $cw->blocking(0);
 
     my $rin = q<>;
-    vec( $rin, fileno($cr), 1 ) = 1;
+    vec( $rin, fileno($cw), 1 ) = 1;
 
     my $rout;
 
     while (1) {
-        if ( select $rout = $rin, undef, undef, undef ) {
-            sysread( $cr, my $buf, 65536 ) or die $!;
+        if ( select undef, $rout = $rin, undef, undef ) {
+            syswrite( $cw, ('x' x 65536) ) or die $!;
         }
         kill 'USR1', $ppid or die $!;
     }
@@ -40,7 +40,7 @@ $pid or do {
     exit;
 };
 
-close $cr or die $!;
+close $cw or die $!;
 
 my $start = time;
 
@@ -49,7 +49,7 @@ my $secs = 8;
 note "Thrashing IPC for $secs seconds to test EINTR resistance …";
 
 while (time - $start < $secs) {
-    IO::SigGuard::write( $pw, 'x' x 65536 ) or die $!;
+    IO::SigGuard::sysread( $pr, my $buf, 65536 ) or die $!;
 }
 
 kill 'TERM', $pid or die $!;
