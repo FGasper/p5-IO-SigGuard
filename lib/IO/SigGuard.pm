@@ -6,10 +6,35 @@ package IO::SigGuard;
 
 IO::SigGuard - Signal protection for sysread/syswrite
 
+=head1 SYNOPSIS
+
+    IO::SigGuard::sysread( $fh, $buf, $size );
+    IO::SigGuard::sysread( $fh, $buf, $size, $offset );
+
+    IO::SigGuard::syswrite( $fh, $buf );
+    IO::SigGuard::syswrite( $fh, $buf, $len );
+    IO::SigGuard::syswrite( $fh, $buf, $len, $offset );
+
+=head1 DESCRIPTION
+
+C<perldoc perlipc> describes how Perl versions from 5.8.0 onward disable
+the OS’s SA_RESTART flag when installing Perl signal handlers.
+
+This module restores that pattern: it does an automatic restart
+when a signal interrupts an operation, so you can entirely avoid
+the generally-useless C<EINTR> error when using
+C<sysread()> and C<syswrite()>.
+
+Other than that you’ll never see C<EINTR>, then, and that
+there are no function prototypes used, this module’s functions exactly
+match Perl’s equivalent built-ins.
+
 =cut
 
 use strict;
 use warnings;
+
+our $VERSION = '0.01';
 
 #As light as possible …
 
@@ -45,5 +70,23 @@ sub write {
 
     return $wrote;
 }
+
+=head1 REPOSITORY
+
+L<https://github.com/FGasper/p5-IO-SigGuard>
+
+=head1 AUTHOR
+
+Felipe Gasper (FELIPE)
+
+=head1 COPYRIGHT
+
+Copyright 2017 by L<Gasper Software Consulting, LLC|http://gaspersoftware.com>
+
+=head1 LICENSE
+
+This distribution is released under the same license as Perl.
+
+=cut
 
 1;
