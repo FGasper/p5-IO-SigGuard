@@ -1,5 +1,13 @@
 package IO::Sys;
 
+=encoding utf-8
+
+=head1 NAME
+
+IO::Sys - Signal protection for sysread/syswrite
+
+=cut
+
 use strict;
 use warnings;
 
