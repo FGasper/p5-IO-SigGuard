@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use autodie;
 
 use Test::More;
 
@@ -15,10 +14,12 @@ $SIG{'USR1'} = sub {};
 
 my ($cr, $pw);
 
-pipe( $cr, $pw );
+pipe( $cr, $pw ) or die $!;
 
-my $pid = fork or do {
-    close $pw;
+my $pid = fork;
+die $! if !defined $pid;
+$pid or do {
+    close $pw or die;
 
     my $ppid = getppid;
 
@@ -31,15 +32,15 @@ my $pid = fork or do {
 
     while (1) {
         if ( select $rout = $rin, undef, undef, undef ) {
-            sysread( $cr, my $buf, 65536 );
+            sysread( $cr, my $buf, 65536 ) or die $!;
         }
-        kill 'USR1', $ppid;
+        kill 'USR1', $ppid or die $!;
     }
 
     exit;
 };
 
-close $cr;
+close $cr or die $!;
 
 my $start = time;
 
@@ -51,6 +52,6 @@ while (time - $start < $secs) {
     IO::Sys::write( $pw, 'x' x 65536 ) or die $!;
 }
 
-kill 'TERM', $pid;
+kill 'TERM', $pid or die $!;
 
 ok 1;
