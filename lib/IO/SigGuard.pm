@@ -1,10 +1,10 @@
-package IO::Sys;
+package IO::SigGuard;
 
 =encoding utf-8
 
 =head1 NAME
 
-IO::Sys - Signal protection for sysread/syswrite
+IO::SigGuard - Signal protection for sysread/syswrite
 
 =cut
 

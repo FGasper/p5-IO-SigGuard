@@ -4,10 +4,10 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
-    NAME         => 'IO::Sys',
-    VERSION_FROM => 'lib/IO/Sys.pm',         # finds \$VERSION
+    NAME         => 'IO::SigGuard',
+    VERSION_FROM => 'lib/IO/SigGuard.pm',         # finds \$VERSION
     AUTHOR       => 'Felipe Gasper',
-    ABSTRACT_FROM => 'lib/IO/Sys.pm',
+    ABSTRACT_FROM => 'lib/IO/SigGuard.pm',
     LICENSE      => 'perl',
 
     PREREQ_PM    => {
@@ -17,8 +17,8 @@ WriteMakefile(
         resources   => {
             repository => {
                 type => 'git',
-                url  => 'https://github.com/FGasper/p5-IO-Sys.git',
-                web  => 'https://github.com/FGasper/p5-IO-Sys',
+                url  => 'https://github.com/FGasper/p5-IO-SigGuard.git',
+                web  => 'https://github.com/FGasper/p5-IO-SigGuard',
             },
         },
     },
