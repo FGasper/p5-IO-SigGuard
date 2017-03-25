@@ -1,0 +1,6 @@
+.gitignore
+MANIFEST
+Makefile.PL
+lib/IO/SigGuard.pm
+t/IO-SigGuard_sysread.t
+t/IO-SigGuard_syswrite.t
