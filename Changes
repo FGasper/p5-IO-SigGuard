@@ -2,3 +2,6 @@ Revision history for Perl module IO::SigGuard
 
 0.01 Fri Mar 24 2017
 - Initial release
+
+0.011 Sun Mar 26 2017
+- Windows compatibility in tests, courtesy of MARIOROY
