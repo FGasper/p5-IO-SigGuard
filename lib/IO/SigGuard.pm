@@ -34,7 +34,7 @@ match Perl’s equivalent built-ins.
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.011';
 
 #As light as possible …
 
@@ -78,6 +78,9 @@ L<https://github.com/FGasper/p5-IO-SigGuard>
 =head1 AUTHOR
 
 Felipe Gasper (FELIPE)
+
+… with special thanks to Mario Roy (MARIOROY) for extra testing
+and a few fixes/improvements.
 
 =head1 COPYRIGHT
 

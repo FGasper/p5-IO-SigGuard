@@ -10,18 +10,18 @@ use IO::SigGuard ();
 plan tests => 1;
 
 #NB: not 'IGNORE'
-$SIG{'USR1'} = sub {};
+$SIG{'QUIT'} = sub {};
 
 my ($cr, $pw);
 
 pipe( $cr, $pw ) or die $!;
 
-my $pid = fork;
-die $! if !defined $pid;
-$pid or do {
-    close $pw or die;
+my $ppid = $$;
 
-    my $ppid = getppid;
+my $cpid = fork;
+die $! if !defined $cpid;
+$cpid or do {
+    close $pw or die;
 
     $cr->blocking(0);
 
@@ -34,7 +34,9 @@ $pid or do {
         if ( select $rout = $rin, undef, undef, undef ) {
             sysread( $cr, my $buf, 65536 ) or die $!;
         }
-        kill 'USR1', $ppid or die $!;
+
+        #Without this it’s possible to trip Perl’s 120-signals limit.
+        select undef, undef, undef, 0.01;
     }
 
     exit;
@@ -49,9 +51,9 @@ my $secs = 8;
 note "Thrashing IPC for $secs seconds to test EINTR resistance …";
 
 while (time - $start < $secs) {
-    IO::SigGuard::syswrite( $pw, 'x' x 65536 ) or die $!;
+    IO::SigGuard::syswrite( $pw, 'x' x 64 ) or die $!;
 }
 
-kill 'TERM', $pid or die $!;
+kill 'KILL', $cpid or die $!;
 
 ok 1;
