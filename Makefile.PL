@@ -29,7 +29,6 @@ WriteMakefile1(
         'Test::Simple'    => 0,
         'File::Temp' => 0,
         'File::Slurp' => 0,
-        'IO::File' => 1.14,
     },
 );
 

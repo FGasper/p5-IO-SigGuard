@@ -34,7 +34,7 @@ match Perl’s equivalent built-ins.
 use strict;
 use warnings;
 
-our $VERSION = '0.012';
+our $VERSION = '0.013';
 
 #As light as possible …
 

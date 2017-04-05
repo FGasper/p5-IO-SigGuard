@@ -5,6 +5,8 @@ use warnings;
 
 use Test::More;
 
+use IO::File ();
+
 use IO::SigGuard ();
 
 plan tests => 1;
@@ -15,6 +17,8 @@ $SIG{'QUIT'} = sub {};
 my ($cr, $pw);
 
 pipe( $cr, $pw ) or die $!;
+
+$cr = IO::File->new_from_fd( fileno($cr), 'r' );
 
 my $ppid = $$;
 
