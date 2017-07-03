@@ -15,6 +15,8 @@ IO::SigGuard - Signal protection for sysread/syswrite
     IO::SigGuard::syswrite( $fh, $buf, $len );
     IO::SigGuard::syswrite( $fh, $buf, $len, $offset );
 
+    IO::SigGuard::select( $read, $write, $exc, $timeout );
+
 =head1 DESCRIPTION
 
 C<perldoc perlipc> describes how Perl versions from 5.8.0 onward disable
@@ -70,6 +72,35 @@ sub syswrite {
 
     return $wrote;
 }
+
+my ($start, $last_loop_time, $os_error, $nfound, $timeleft);
+my $timeleft2;
+
+sub sselect {
+    $os_error = $!;
+
+    $timeleft = $_[3];
+
+  SELECT: {
+        ($nfound, $timeleft2) = CORE::select( $_[0], $_[1], $_[2], $timeleft );
+print STDERR "timeleft: $timeleft2\n";
+        if ($nfound == -1) {
+            if ($!{'EINTR'}) {
+                redo SELECT;
+            }
+        }
+        else {
+
+            #select() doesn’t set $! on success, so let’s not clobber what
+            #value was there before.
+            $! = $os_error;
+        }
+
+        return wantarray ? ($nfound, $timeleft) : $nfound;
+    }
+}
+
+*select = \&sselect;
 
 =head1 REPOSITORY
 
