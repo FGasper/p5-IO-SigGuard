@@ -10,19 +10,15 @@ use File::Temp ();
 
 use IO::File ();
 
-BEGIN {
-    unshift @INC, '/Users/felipe/code/p5-IO-SigGuard/lib';
-    print "INC: @INC\n";
-}
 use IO::SigGuard ();
 
 plan tests => 13;
 
 my $sigs_received = 0;
+
 $SIG{'QUIT'} = sub {
     $sigs_received++;
     diag "$$ got $_[0]";
-    #die if $received == 10;
 };
 
 my $ppid = $$;
@@ -45,7 +41,7 @@ my $spawn_killer = sub {
 
 my $pid = $spawn_killer->();
 
-my $nfound = IO::SigGuard::sselect( undef, undef, undef, 3 );
+my $nfound = IO::SigGuard::select( undef, undef, undef, 3 );
 
 my $os_error = $!;
 

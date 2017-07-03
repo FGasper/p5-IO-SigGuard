@@ -25,11 +25,30 @@ the OS’s SA_RESTART flag when installing Perl signal handlers.
 This module restores that pattern: it does an automatic restart
 when a signal interrupts an operation, so you can entirely avoid
 the generally-useless C<EINTR> error when using
-C<sysread()> and C<syswrite()>.
+C<sysread()>, C<syswrite()>, and C<select()>.
 
-Other than that you’ll never see C<EINTR>, then, and that
-there are no function prototypes used, this module’s functions exactly
-match Perl’s equivalent built-ins.
+=head1 ABOUT C<sysread()> and C<syswrite()>
+
+Other than that you’ll never see C<EINTR> and that
+there are no function prototypes used (i.e., you need parentheses on
+all invocations), C<sysread()> and C<syswrite()>
+work exactly the same as Perl’s equivalent built-ins.
+
+=head1 ABOUT C<select()>
+
+In scalar contact, C<IO::SigGuard::select()> should be a drop-in replacement
+for Perl’s built-in.
+
+In list context, there may be discrepancies in the C<$timeleft> value
+that Perl returns from a call to C<select>. This value, as per Perl’s
+documentation is generally not reliable anyway, so that shouldn’t be a big
+deal. In fact, on systems (e.g., MacOS) where the built-in’s C<$timeleft>
+is completely useless, IO::SigGuard’s return is actually *better* since it
+does provide at least a rough value for how much of the given timeout value
+is left.
+
+If you have C<Time::HiRes> loaded, then C<$timeleft> will include fractions
+of a second; otherwise, that value will be an integer.
 
 =cut
 
@@ -73,19 +92,21 @@ sub syswrite {
     return $wrote;
 }
 
-my ($start, $last_loop_time, $os_error, $nfound, $timeleft);
-my $timeleft2;
+my ($start, $last_loop_time, $os_error, $nfound, $timeleft, $timer_cr);
 
-sub sselect {
+sub select {
     $os_error = $!;
 
-    $timeleft = $_[3];
+    $timer_cr = Time::HiRes->can('time') || \&CORE::time;
+
+    $start = $timer_cr->();
+    $last_loop_time = $start;
 
   SELECT: {
-        ($nfound, $timeleft2) = CORE::select( $_[0], $_[1], $_[2], $timeleft );
-print STDERR "timeleft: $timeleft2\n";
+        ($nfound, $timeleft) = CORE::select( $_[0], $_[1], $_[2], $_[3] - $last_loop_time + $start );
         if ($nfound == -1) {
             if ($!{'EINTR'}) {
+                $last_loop_time = $timer_cr->();
                 redo SELECT;
             }
         }
@@ -99,8 +120,6 @@ print STDERR "timeleft: $timeleft2\n";
         return wantarray ? ($nfound, $timeleft) : $nfound;
     }
 }
-
-*select = \&sselect;
 
 =head1 REPOSITORY
 
