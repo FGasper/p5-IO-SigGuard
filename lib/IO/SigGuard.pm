@@ -24,38 +24,59 @@ the OS’s SA_RESTART flag when installing Perl signal handlers.
 
 This module restores that pattern: it does an automatic restart
 when a signal interrupts an operation, so you can entirely avoid
-the generally-useless C<EINTR> error when using
+the generally-useless EINTR error when using
 C<sysread()>, C<syswrite()>, and C<select()>.
 
 =head1 ABOUT C<sysread()> and C<syswrite()>
 
-Other than that you’ll never see C<EINTR> and that
+Other than that you’ll never see EINTR and that
 there are no function prototypes used (i.e., you need parentheses on
 all invocations), C<sysread()> and C<syswrite()>
 work exactly the same as Perl’s equivalent built-ins.
 
 =head1 ABOUT C<select()>
 
-In scalar contact, C<IO::SigGuard::select()> should be a drop-in replacement
-for Perl’s built-in.
+To handle EINTR, C<IO::SigGuard::select()> has to subtract the elapsed time
+from the given timeout then repeat the internal C<select()>. Because
+the C<select()> built-in’s C<$timeleft> return is not reliable across
+all platforms, we have to compute the elapsed time ourselves. By default the
+only means of doing this is the C<time()> built-in, which can only measure
+individual seconds.
 
-In list context, there may be discrepancies in the C<$timeleft> value
-that Perl returns from a call to C<select>. This value, as per Perl’s
-documentation is generally not reliable anyway, so that shouldn’t be a big
-deal. In fact, on systems (e.g., MacOS) where the built-in’s C<$timeleft>
-is completely useless, IO::SigGuard’s return is actually *better* since it
-does provide at least a rough value for how much of the given timeout value
+This works, but there are two ways to make it more accurate:
+
+=over
+
+=item * Have L<Time::HiRes> loaded, and C<IO::SigGuard::select()> will use that
+module rather than the C<time()> built-in.
+
+=item * Set C<$IO::SigGuard::TIME_CR> to a compatible code reference. This is
+useful, e.g., if you have your own logic to do the equivalent of
+L<Time::HiRes>—for example, in Linux you may prefer to call the C<gettimeofday>
+system call directly from Perl to avoid L<Time::HiRes>’s XS overhead.
+
+=back
+
+In scalar contact, C<IO::SigGuard::select()> is a drop-in replacement
+for Perl’s 4-argument built-in.
+
+In list context, there may be discrepancies re the C<$timeleft> value
+that Perl returns from a call to C<select>. As per Perl’s documentation
+this value is generally not reliable anyway, though, so that shouldn’t be a
+big deal. In fact, on systems (e.g., MacOS) where the built-in’s C<$timeleft>
+is completely useless, IO::SigGuard’s return is actually B<better> since it
+does provide at least a rough estimate of how much of the given timeout value
 is left.
-
-If you have C<Time::HiRes> loaded, then C<$timeleft> will include fractions
-of a second; otherwise, that value will be an integer.
 
 =cut
 
 use strict;
 use warnings;
 
-our $VERSION = '0.013';
+our $VERSION = '0.02-TRIAL1';
+
+#Set this in lieu of using Time::HiRes or built-in time().
+our $TIME_CR;
 
 #As light as possible …
 
@@ -95,9 +116,11 @@ sub syswrite {
 my ($start, $last_loop_time, $os_error, $nfound, $timeleft, $timer_cr);
 
 sub select {
+    die( (caller 0)[3] . ' must have 4 arguments!' ) if @_ != 4;
+
     $os_error = $!;
 
-    $timer_cr = Time::HiRes->can('time') || \&CORE::time;
+    $timer_cr = $TIME_CR || Time::HiRes->can('time') || \&CORE::time;
 
     $start = $timer_cr->();
     $last_loop_time = $start;

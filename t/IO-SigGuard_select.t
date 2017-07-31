@@ -27,11 +27,11 @@ my $spawn_killer = sub {
     $sigs_received = 0;
 
     my $pid = fork or do {
-        for (1 .. 10) {
-            select( undef, undef, undef, 0.5 );
-
+        for (1 .. 20) {
             kill 'QUIT', $ppid;
             diag "$$ sent SIGQUIT";
+
+            select( undef, undef, undef, 0.5 );
         }
         exit;
     };
@@ -41,13 +41,14 @@ my $spawn_killer = sub {
 
 my $pid = $spawn_killer->();
 
-my $nfound = IO::SigGuard::select( undef, undef, undef, 3 );
+my $nfound = IO::SigGuard::select( undef, undef, undef, 5 );
 
 my $os_error = $!;
 
 kill 'KILL', $pid;
+waitpid $pid, 0;
 
-cmp_ok( $sigs_received, '>=', 1, 'got signals' );
+cmp_ok( $sigs_received, '>=', 2, 'got signals' );
 is( $nfound, 0, '… but nothing to read (scalar)' );
 is( 0 + $os_error, 0, '… and $! is as expected' );
 
@@ -55,13 +56,14 @@ my $timeleft;
 
 $pid = $spawn_killer->();
 
-($nfound, $timeleft) = IO::SigGuard::select( undef, undef, undef, 3 );
+($nfound, $timeleft) = IO::SigGuard::select( undef, undef, undef, 5 );
 
 $os_error = $!;
 
 kill 'KILL', $pid;
+waitpid $pid, 0;
 
-cmp_ok( $sigs_received, '>=', 1, 'got signals' );
+cmp_ok( $sigs_received, '>=', 2, 'got signals' );
 is( $nfound, 0, '… but nothing to read (list)' );
 is( $timeleft, 0, '… and no time left (list)' );
 is( 0 + $os_error, 0, '… and $! is as expected' );
