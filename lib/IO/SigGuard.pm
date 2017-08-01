@@ -73,7 +73,7 @@ is left.
 use strict;
 use warnings;
 
-our $VERSION = '0.02-TRIAL2';
+our $VERSION = '0.02-TRIAL3';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;
@@ -115,12 +115,15 @@ sub syswrite {
 
 my ($start, $last_loop_time, $os_error, $nfound, $timeleft, $timer_cr);
 
+#pre-5.16 didn’t have \&CORE::time.
+sub _time { time }
+
 sub select {
     die( (caller 0)[3] . ' must have 4 arguments!' ) if @_ != 4;
 
     $os_error = $!;
 
-    $timer_cr = $TIME_CR || Time::HiRes->can('time') || \&CORE::time;
+    $timer_cr = $TIME_CR || Time::HiRes->can('time') || \&_time;
 
     $start = $timer_cr->();
     $last_loop_time = $start;
