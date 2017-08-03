@@ -70,29 +70,35 @@ is( 0 + $os_error, 0, '… and $! is as expected' );
 
 #----------------------------------------------------------------------
 
-my ($fh, $fpath) = File::Temp::tempfile( CLEANUP => 1 );
-my $in = q<>;
-vec( $in, fileno($fh), 1 ) = 1;
+SKIP: {
+    if ( $^O eq 'MSWin32' ) {
+        skip 'Windows select() only does sockets.', 6;
+    }
 
-my $out;
+    my ($fh, $fpath) = File::Temp::tempfile( CLEANUP => 1 );
+    my $in = q<>;
+    vec( $in, fileno($fh), 1 ) = 1;
 
-$nfound = IO::SigGuard::select( undef, $out = $in, undef, 30 );
+    my $out;
 
-is( $nfound, 1, 'select() gives write as expected (scalar)' );
+    $nfound = IO::SigGuard::select( undef, $out = $in, undef, 30 );
 
-($nfound, $timeleft) = IO::SigGuard::select( undef, $out = $in, undef, 30 );
+    is( $nfound, 1, 'select() gives write as expected (scalar)' );
 
-is( $nfound, 1, 'select() gives write as expected (list)' );
-cmp_ok( $timeleft, '<=', 30, '… and time left is as expected' );
+    ($nfound, $timeleft) = IO::SigGuard::select( undef, $out = $in, undef, 30 );
 
-syswrite( $fh, 'x' );
-sysseek( $fh, 0, 0 );
+    is( $nfound, 1, 'select() gives write as expected (list)' );
+    cmp_ok( $timeleft, '<=', 30, '… and time left is as expected' );
 
-$nfound = IO::SigGuard::select( $out = $in, undef, undef, 30 );
+    syswrite( $fh, 'x' );
+    sysseek( $fh, 0, 0 );
 
-is( $nfound, 1, 'select() gives read as expected (scalar)' );
+    $nfound = IO::SigGuard::select( $out = $in, undef, undef, 30 );
 
-($nfound, $timeleft) = IO::SigGuard::select( $out = $in, undef, undef, 30 );
+    is( $nfound, 1, 'select() gives read as expected (scalar)' );
 
-is( $nfound, 1, 'select() gives read as expected (list)' );
-cmp_ok( $timeleft, '<=', 30, '… and time left is as expected' );
+    ($nfound, $timeleft) = IO::SigGuard::select( $out = $in, undef, undef, 30 );
+
+    is( $nfound, 1, 'select() gives read as expected (list)' );
+    cmp_ok( $timeleft, '<=', 30, '… and time left is as expected' );
+}

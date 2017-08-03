@@ -68,12 +68,14 @@ is completely useless, IO::SigGuard’s return is actually B<better> since it
 does provide at least a rough estimate of how much of the given timeout value
 is left.
 
+See C<perlport> for portability notes for C<select>.
+
 =cut
 
 use strict;
 use warnings;
 
-our $VERSION = '0.02-TRIAL3';
+our $VERSION = '0.02-TRIAL4';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;
