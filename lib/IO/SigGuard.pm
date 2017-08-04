@@ -75,7 +75,7 @@ See C<perlport> for portability notes for C<select>.
 use strict;
 use warnings;
 
-our $VERSION = '0.02-TRIAL4';
+our $VERSION = '0.02-TRIAL5';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;
@@ -133,10 +133,17 @@ sub select {
   SELECT: {
         ($nfound, $timeleft) = CORE::select( $_[0], $_[1], $_[2], $_[3] - $last_loop_time + $start );
         if ($nfound == -1) {
+
+            #Use of %! will autoload Errno.pm,
+            #which can affect the value of $!.
+            my $select_error = $!;
+
             if ($!{'EINTR'}) {
                 $last_loop_time = $timer_cr->();
                 redo SELECT;
             }
+
+            $! = $select_error;
         }
         else {
 
