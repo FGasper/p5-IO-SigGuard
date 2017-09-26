@@ -15,4 +15,4 @@ perl:
   - "5.10"
   - "5.8"
 before_install:
-  - if [ $TRAVIS_OS_NAME = osx ]; then curl -L https://install.perlbrew.pl | sh; fi
+  - if [ $TRAVIS_OS_NAME = osx ]; then sudo curl -L https://install.perlbrew.pl | sudo sh; fi
