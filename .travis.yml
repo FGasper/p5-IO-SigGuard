@@ -1,6 +1,6 @@
 language: perl
 os:
-  - linux
+#  - linux
   - osx
 perl:
   - "5.28"
@@ -14,3 +14,5 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
+before_install:
+  - if [ $TRAVIS_OS_NAME = osx ]; then curl -L https://install.perlbrew.pl | sh; fi
