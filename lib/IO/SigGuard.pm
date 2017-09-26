@@ -75,7 +75,7 @@ See C<perlport> for portability notes for C<select>.
 use strict;
 use warnings;
 
-our $VERSION = '0.02-TRIAL5';
+our $VERSION = '0.02-TRIAL7';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;

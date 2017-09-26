@@ -50,7 +50,11 @@ waitpid $pid, 0;
 
 cmp_ok( $sigs_received, '>=', 2, 'got signals' );
 is( $nfound, 0, '… but nothing to read (scalar)' );
-is( 0 + $os_error, 0, '… and $! is as expected' ) or diag "$os_error";
+
+{
+    local $! = $os_error;
+    ok( !$!{'EINTR'}, '… and $! is not EINTR' ) or diag "$os_error";
+}
 
 my $timeleft;
 
@@ -66,7 +70,11 @@ waitpid $pid, 0;
 cmp_ok( $sigs_received, '>=', 2, 'got signals' );
 is( $nfound, 0, '… but nothing to read (list)' );
 is( $timeleft, 0, '… and no time left (list)' );
-is( 0 + $os_error, 0, '… and $! is as expected' ) or diag "$os_error";
+
+{
+    local $! = $os_error;
+    ok( !$!{'EINTR'}, '… and $! is not EINTR' ) or diag "$os_error";
+}
 
 #----------------------------------------------------------------------
 
