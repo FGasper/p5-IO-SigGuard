@@ -1,7 +1,7 @@
 language: perl
 os:
-#  - linux
-  - osx
+  - linux
+#  - osx    #doesn’t install the correct perl
 perl:
   - "5.28"
   - "5.26"
@@ -14,5 +14,9 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
-before_install:
-  - if [ $TRAVIS_OS_NAME = osx ]; then sudo curl -L https://install.perlbrew.pl | sudo sh; fi
+matrix:
+  include:
+    - os: osx
+    - perl: system
+#before_install:
+#  - if [ $TRAVIS_OS_NAME = osx ]; then sudo curl -L https://install.perlbrew.pl | sudo sh; fi
