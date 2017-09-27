@@ -17,6 +17,6 @@ perl:
 matrix:
   include:
     - os: osx
-    - perl: system
+      perl: system
 #before_install:
 #  - if [ $TRAVIS_OS_NAME = osx ]; then sudo curl -L https://install.perlbrew.pl | sudo sh; fi
