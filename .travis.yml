@@ -19,6 +19,6 @@ matrix:
     - os: osx
       perl: system
       before_install:
-        - sudo cpan install App::cpanminus
+        - sudo cpan -j .travis/CPAN.pm App::cpanminus
 #before_install:
 #  - if [ $TRAVIS_OS_NAME = osx ]; then sudo curl -L https://install.perlbrew.pl | sudo sh; fi
