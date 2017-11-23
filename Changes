@@ -14,3 +14,6 @@ Revision history for Perl module IO::SigGuard
 
 0.02
 - select() support
+
+0.021 Thu Nov 23 2017
+- Documentation update (no code changes)

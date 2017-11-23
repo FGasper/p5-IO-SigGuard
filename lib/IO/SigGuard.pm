@@ -4,7 +4,7 @@ package IO::SigGuard;
 
 =head1 NAME
 
-IO::SigGuard - Signal protection for sysread/syswrite
+IO::SigGuard - SA_RESTART in pure Perl
 
 =head1 SYNOPSIS
 
@@ -22,8 +22,8 @@ IO::SigGuard - Signal protection for sysread/syswrite
 C<perldoc perlipc> describes how Perl versions from 5.8.0 onward disable
 the OS’s SA_RESTART flag when installing Perl signal handlers.
 
-This module restores that pattern: it does an automatic restart
-when a signal interrupts an operation, so you can entirely avoid
+This module imitates that pattern in pure Perl: it does an automatic
+restart when a signal interrupts an operation so you can avoid
 the generally-useless EINTR error when using
 C<sysread()>, C<syswrite()>, and C<select()>.
 
@@ -63,19 +63,25 @@ for Perl’s 4-argument built-in.
 In list context, there may be discrepancies re the C<$timeleft> value
 that Perl returns from a call to C<select>. As per Perl’s documentation
 this value is generally not reliable anyway, though, so that shouldn’t be a
-big deal. In fact, on systems (e.g., MacOS) where the built-in’s C<$timeleft>
+big deal. In fact, on systems like MacOS where the built-in’s C<$timeleft>
 is completely useless, IO::SigGuard’s return is actually B<better> since it
 does provide at least a rough estimate of how much of the given timeout value
 is left.
 
 See C<perlport> for portability notes for C<select>.
 
+=head1 TODO
+
+This pattern could probably be extended to C<send>, C<recv>, C<flock>, and
+other system calls that can receive EINTR. If there’s a desire for that I’ll
+consider adding it.
+
 =cut
 
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.021';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;
