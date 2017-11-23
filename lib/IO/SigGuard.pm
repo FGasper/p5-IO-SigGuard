@@ -81,7 +81,7 @@ consider adding it.
 use strict;
 use warnings;
 
-our $VERSION = '0.021';
+our $VERSION = '0.022';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;
@@ -175,7 +175,7 @@ and a few fixes/improvements.
 
 =head1 COPYRIGHT
 
-Copyright 2017 by L<Gasper Software Consulting, LLC|http://gaspersoftware.com>
+Copyright 2017 by L<Gasper Software Consulting|http://gaspersoftware.com>
 
 =head1 LICENSE
 
