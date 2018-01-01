@@ -27,6 +27,9 @@ restart when a signal interrupts an operation so you can avoid
 the generally-useless EINTR error when using
 C<sysread()>, C<syswrite()>, and C<select()>.
 
+For this to work, whatever signal handler you implement will need to break
+out of this module, probably via either C<die()> or C<exit()>.
+
 =head1 ABOUT C<sysread()> and C<syswrite()>
 
 Other than that you’ll never see EINTR and that
@@ -81,10 +84,16 @@ consider adding it.
 use strict;
 use warnings;
 
-our $VERSION = '0.022';
+use Errno ();
+
+our $VERSION = '0.03-TRIAL1';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;
+
+#Just in case someone has an actual reason to do this.
+our $YES_I_REALLY_MEAN_TO_WRITE_ZERO_BYTES;
+our $TOLERATE_NONERROR_ZERO_WRITE;
 
 #As light as possible …
 
@@ -93,9 +102,7 @@ my $read;
 sub sysread {
   READ: {
         $read = ( (@_ == 3) ? CORE::sysread( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::sysread( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! (@_)" ) or do {
-            if ($!) {
-                redo READ if $!{'EINTR'};
-            }
+            redo READ if $! == Errno::EINTR();
         };
     }
 
@@ -105,16 +112,11 @@ sub sysread {
 my $wrote;
 
 sub syswrite {
-    $wrote = 0;
-
   WRITE: {
-        $wrote += ( (@_ == 2) ? CORE::syswrite( $_[0], $_[1], length($_[1]) - $wrote, $wrote ) : (@_ == 3) ? CORE::syswrite( $_[0], $_[1], $_[2] - $wrote, $wrote ) : (@_ == 4) ? CORE::syswrite( $_[0], $_[1], $_[2] - $wrote, $_[3] + $wrote ) : die "Wrong args count! (@_)" ) || do {
-            if ($!) {
-                redo WRITE if $!{'EINTR'};  #EINTR => file pointer unchanged
-                return undef;
-            }
+        $wrote = ( (@_ == 2) ? CORE::syswrite( $_[0], $_[1] ) : (@_ == 3) ? CORE::syswrite( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::syswrite( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! (@_)" ) || do {
 
-            die "empty write without error??";  #unexpected!
+            #EINTR means the file pointer is unchanged.
+            redo WRITE if $! == Errno::EINTR();
         };
     }
 
@@ -144,7 +146,7 @@ sub select {
             #which can affect the value of $!.
             my $select_error = $!;
 
-            if ($!{'EINTR'}) {
+            if ($! == Errno::EINTR()) {
                 $last_loop_time = $timer_cr->();
                 redo SELECT;
             }

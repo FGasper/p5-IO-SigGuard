@@ -25,6 +25,9 @@ restart when a signal interrupts an operation so you can avoid
 the generally-useless EINTR error when using
 C<sysread()>, C<syswrite()>, and C<select()>.
 
+For this to work, whatever signal handler you implement will need to break
+out of this module, probably via either C<die()> or C<exit()>.
+
 =head1 ABOUT C<sysread()> and C<syswrite()>
 
 Other than that you’ll never see EINTR and that

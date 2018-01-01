@@ -1,22 +1,27 @@
 Revision history for Perl module IO::SigGuard
 
-0.01 Fri Mar 24 2017
-- Initial release
+0.03 Sun Dec 31 2017
+- Switch to literal Errno.pm rather than %! (to allow mocked Errno).
+- Make a separate exception when we try to write zero bytes.
+- Remove syswrite() exceptions.
 
-0.011 Sun Mar 26 2017
-- Windows compatibility in tests, courtesy of MARIOROY
-
-0.012 Tue Apr 4 2017
-- Fix tests to require a sufficient IO::File version
-
-0.013 Tue Apr 4 2017
-- Make IO::File actually used in tests
-
-0.02
-- select() support
+0.022 Thu Nov 23 2017
+- Copyright update (no code changes)
 
 0.021 Thu Nov 23 2017
 - Documentation update (no code changes)
 
-0.022 Thu Nov 23 2017
-- Copyright update (no code changes)
+0.02
+- select() support
+
+0.013 Tue Apr 4 2017
+- Make IO::File actually used in tests
+
+0.012 Tue Apr 4 2017
+- Fix tests to require a sufficient IO::File version
+
+0.011 Sun Mar 26 2017
+- Windows compatibility in tests, courtesy of MARIOROY
+
+0.01 Fri Mar 24 2017
+- Initial release
