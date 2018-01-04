@@ -4,6 +4,7 @@ Revision history for Perl module IO::SigGuard
 - Switch to literal Errno.pm rather than %! (to allow mocked Errno).
 - Make a separate exception when we try to write zero bytes.
 - Remove syswrite() exceptions.
+- Skip select() test on Windows since it’s kind of pointless.
 
 0.022 Thu Nov 23 2017
 - Copyright update (no code changes)
