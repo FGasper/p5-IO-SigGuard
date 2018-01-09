@@ -1,5 +1,9 @@
 Revision history for Perl module IO::SigGuard
 
+0.10 Tue Jan 9 2018
+- Switch to two-digit version numbers (rpm seems to like them better)
+- remove README.pod from Makefile target (cf. EU::MM #119)
+
 0.03 Sun Dec 31 2017
 - Switch to literal Errno.pm rather than %! (to allow mocked Errno).
 - Make a separate exception when we try to write zero bytes.

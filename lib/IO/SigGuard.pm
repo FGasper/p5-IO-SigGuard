@@ -86,7 +86,7 @@ use warnings;
 
 use Errno ();
 
-our $VERSION = '0.03';
+our $VERSION = '0.10';
 
 #Set this in lieu of using Time::HiRes or built-in time().
 our $TIME_CR;

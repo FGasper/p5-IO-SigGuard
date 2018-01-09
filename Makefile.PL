@@ -1,6 +1,14 @@
 
 use ExtUtils::MakeMaker;
 
+#hack to accommodate https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/issues/119
+my $old_libscan = \&ExtUtils::MM_Any::libscan;
+*ExtUtils::MM_Any::libscan = sub {
+    my ($self, $path) = @_;
+    return q<> if $path eq 'README.pod';
+    return $old_libscan->(@_);
+};
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile1(
