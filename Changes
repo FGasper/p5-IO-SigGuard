@@ -1,5 +1,8 @@
 Revision history for Perl module IO::SigGuard
 
+0.12 Fri Aug 24 2018
+- Fix LICENSE file. (mea culpa …)
+
 0.11 Fri Aug 24 2018
 - Add LICENSE file.
 
