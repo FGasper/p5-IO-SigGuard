@@ -7,6 +7,7 @@ Makefile.PL
 README.pod
 lib/IO/SigGuard.pm
 lib/IO/SigGuard/recv.pm
+lib/IO/SigGuard/select.pm
 lib/IO/SigGuard/send.pm
 lib/IO/SigGuard/sysread.pm
 lib/IO/SigGuard/syswrite.pm
