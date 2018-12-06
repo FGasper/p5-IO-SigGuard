@@ -4,7 +4,7 @@ Changes
 LICENSE
 MANIFEST
 Makefile.PL
-README.pod
+README.md
 lib/IO/SigGuard.pm
 lib/IO/SigGuard/recv.pm
 lib/IO/SigGuard/select.pm
