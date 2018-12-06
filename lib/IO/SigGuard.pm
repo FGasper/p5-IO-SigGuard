@@ -15,6 +15,9 @@ IO::SigGuard - SA_RESTART in pure Perl
     IO::SigGuard::syswrite( $fh, $buf, $len );
     IO::SigGuard::syswrite( $fh, $buf, $len, $offset );
 
+    IO::SigGuard::send( $fh, $msg, $flags );
+    IO::SigGuard::send( $fh, $msg, $flags, $to );
+
     IO::SigGuard::select( $read, $write, $exc, $timeout );
 
 =head1 DESCRIPTION
@@ -97,30 +100,50 @@ our $TOLERATE_NONERROR_ZERO_WRITE;
 
 #As light as possible …
 
-my $read;
+my $result;
 
 sub sysread {
   READ: {
-        $read = ( (@_ == 3) ? CORE::sysread( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::sysread( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! (@_)" ) or do {
+        $result = ( (@_ == 3) ? CORE::sysread( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::sysread( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! sysread(@_)" ) or do {
             redo READ if $! == Errno::EINTR();
         };
     }
 
-    return $read;
+    return $result;
 }
 
-my $wrote;
+sub recv {
+  RECV: {
+        $result = ( (@_ == 4) ? CORE::recv( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! recv(@_)" ) or do {
+            redo RECV if $! == Errno::EINTR();
+        };
+    }
+
+    return $result;
+}
 
 sub syswrite {
   WRITE: {
-        $wrote = ( (@_ == 2) ? CORE::syswrite( $_[0], $_[1] ) : (@_ == 3) ? CORE::syswrite( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::syswrite( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! (@_)" ) || do {
+        $result = ( (@_ == 2) ? CORE::syswrite( $_[0], $_[1] ) : (@_ == 3) ? CORE::syswrite( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::syswrite( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! syswrite(@_)" ) || do {
 
             #EINTR means the file pointer is unchanged.
             redo WRITE if $! == Errno::EINTR();
         };
     }
 
-    return $wrote;
+    return $result;
+}
+
+sub send {
+  SEND: {
+        $result = ( (@_ == 3) ? CORE::send( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::send( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! send(@_)" ) || do {
+
+            #EINTR means the file pointer is unchanged.
+            redo SEND if $! == Errno::EINTR();
+        };
+    }
+
+    return $result;
 }
 
 my ($start, $last_loop_time, $os_error, $nfound, $timeleft, $timer_cr);
