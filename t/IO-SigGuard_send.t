@@ -5,6 +5,8 @@ use warnings;
 
 use Test::More;
 
+use IO::Socket ();
+
 use IO::SigGuard ();
 
 plan tests => 1;
@@ -15,6 +17,8 @@ use Socket;
 $SIG{'QUIT'} = sub {};
 
 socketpair my $psk, my $csk, Socket::PF_UNIX, Socket::SOCK_STREAM, 0;
+
+$csk = IO::Socket->new_from_fd( fileno($csk), 'r+' );
 
 my $ppid = $$;
 
