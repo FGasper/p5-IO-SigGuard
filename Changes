@@ -1,6 +1,6 @@
 Revision history for Perl module IO::SigGuard
 
-0.13
+0.13 Thu Dec 6 2018
 - Add send() and recv()
 - Switch to lazy-loading.
 
