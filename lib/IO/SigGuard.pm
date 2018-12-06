@@ -40,6 +40,14 @@ there are no function prototypes used (i.e., you need parentheses on
 all invocations), C<sysread()> and C<syswrite()>
 work exactly the same as Perl’s equivalent built-ins.
 
+=head1 LAZY-LOADING
+
+As of version 0.13 this module’s functions lazy-load by default. To have
+functionality loaded at compile time give the function name to the import
+logic, e.g.:
+
+    use IO::SigGuard qw(send recv);
+
 =head1 ABOUT C<select()>
 
 To handle EINTR, C<IO::SigGuard::select()> has to subtract the elapsed time
@@ -78,9 +86,8 @@ See C<perlport> for portability notes for C<select>.
 
 =head1 TODO
 
-This pattern could probably be extended to C<send>, C<recv>, C<flock>, and
-other system calls that can receive EINTR. If there’s a desire for that I’ll
-consider adding it.
+This pattern could probably be extended to other system calls that can
+receive EINTR. I’ll consider adding new calls as requested.
 
 =cut
 
@@ -89,102 +96,28 @@ use warnings;
 
 use Errno ();
 
-our $VERSION = '0.12';
-
-#Set this in lieu of using Time::HiRes or built-in time().
-our $TIME_CR;
-
-#Just in case someone has an actual reason to do this.
-our $YES_I_REALLY_MEAN_TO_WRITE_ZERO_BYTES;
-our $TOLERATE_NONERROR_ZERO_WRITE;
+our $VERSION = '0.13-TRIAL1';
 
 #As light as possible …
 
 my $result;
 
-sub sysread {
-  READ: {
-        $result = ( (@_ == 3) ? CORE::sysread( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::sysread( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! sysread(@_)" ) or do {
-            redo READ if $! == Errno::EINTR();
-        };
-    }
+sub import {
+    shift;
 
-    return $result;
+    require "IO/SigGuard/$_.pm" for @_;
+
+    return;
 }
 
-sub recv {
-  RECV: {
-        $result = ( (@_ == 4) ? CORE::recv( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! recv(@_)" ) or do {
-            redo RECV if $! == Errno::EINTR();
-        };
-    }
+our $AUTOLOAD;
 
-    return $result;
-}
+sub AUTOLOAD {
+    $AUTOLOAD = substr( $AUTOLOAD, 1 + rindex($AUTOLOAD, ':') );
 
-sub syswrite {
-  WRITE: {
-        $result = ( (@_ == 2) ? CORE::syswrite( $_[0], $_[1] ) : (@_ == 3) ? CORE::syswrite( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::syswrite( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! syswrite(@_)" ) || do {
+    require "IO/SigGuard/$AUTOLOAD.pm";
 
-            #EINTR means the file pointer is unchanged.
-            redo WRITE if $! == Errno::EINTR();
-        };
-    }
-
-    return $result;
-}
-
-sub send {
-  SEND: {
-        $result = ( (@_ == 3) ? CORE::send( $_[0], $_[1], $_[2] ) : (@_ == 4) ? CORE::send( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! send(@_)" ) || do {
-
-            #EINTR means the file pointer is unchanged.
-            redo SEND if $! == Errno::EINTR();
-        };
-    }
-
-    return $result;
-}
-
-my ($start, $last_loop_time, $os_error, $nfound, $timeleft, $timer_cr);
-
-#pre-5.16 didn’t have \&CORE::time.
-sub _time { time }
-
-sub select {
-    die( (caller 0)[3] . ' must have 4 arguments!' ) if @_ != 4;
-
-    $os_error = $!;
-
-    $timer_cr = $TIME_CR || Time::HiRes->can('time') || \&_time;
-
-    $start = $timer_cr->();
-    $last_loop_time = $start;
-
-  SELECT: {
-        ($nfound, $timeleft) = CORE::select( $_[0], $_[1], $_[2], $_[3] - $last_loop_time + $start );
-        if ($nfound == -1) {
-
-            #Use of %! will autoload Errno.pm,
-            #which can affect the value of $!.
-            my $select_error = $!;
-
-            if ($! == Errno::EINTR()) {
-                $last_loop_time = $timer_cr->();
-                redo SELECT;
-            }
-
-            $! = $select_error;
-        }
-        else {
-
-            #select() doesn’t set $! on success, so let’s not clobber what
-            #value was there before.
-            $! = $os_error;
-        }
-
-        return wantarray ? ($nfound, $timeleft) : $nfound;
-    }
+    goto &{ IO::SigGuard->can($AUTOLOAD) };
 }
 
 =head1 REPOSITORY
