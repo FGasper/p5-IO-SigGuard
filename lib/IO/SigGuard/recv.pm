@@ -1,11 +1,11 @@
 package IO::SigGuard;
 
 sub recv {
-  RECV: {
-        $result = ( (@_ == 4) ? CORE::recv( $_[0], $_[1], $_[2], $_[3] ) : die "Wrong args count! recv(@_)" ) or do {
-            redo RECV if $! == Errno::EINTR();
-        };
-    }
+    die "Wrong args count! recv(@_)" if @_ != 4;
+
+    $result = CORE::recv( $_[0], $_[1], $_[2], $_[3] ) || do {
+        goto &recv if $! == Errno::EINTR();
+    };
 
     return $result;
 }
