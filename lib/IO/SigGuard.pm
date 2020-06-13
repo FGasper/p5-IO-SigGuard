@@ -96,7 +96,7 @@ use warnings;
 
 use Errno ();
 
-our $VERSION = '0.15_02';
+our $VERSION = '0.15';
 
 #As light as possible …
 
