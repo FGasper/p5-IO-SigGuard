@@ -6,6 +6,8 @@ use warnings;
 use Test::More;
 use Test::Deep;
 
+use IO::File;
+
 use IO::SigGuard ();
 
 use Errno;

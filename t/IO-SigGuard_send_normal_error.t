@@ -5,8 +5,6 @@ use warnings;
 
 use Test::More;
 
-use IO::Socket ();
-
 use IO::SigGuard ();
 
 use Errno;

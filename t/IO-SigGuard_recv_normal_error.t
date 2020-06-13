@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use IO::Socket ();
+use IO::File ();
 
 use IO::SigGuard ();
 
