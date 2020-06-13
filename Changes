@@ -1,5 +1,8 @@
 Revision history for Perl module IO::SigGuard
 
+0.15
+- Fix errant error reporting.
+
 0.14 Sun Dec 23 2018
 - Small optimization: replace anonymous loop with goto.
 

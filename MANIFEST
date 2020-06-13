@@ -13,7 +13,11 @@ lib/IO/SigGuard/sysread.pm
 lib/IO/SigGuard/syswrite.pm
 t/IO-SigGuard_import.t
 t/IO-SigGuard_recv.t
+t/IO-SigGuard_recv_normal_error.t
 t/IO-SigGuard_select.t
 t/IO-SigGuard_send.t
+t/IO-SigGuard_send_normal_error.t
 t/IO-SigGuard_sysread.t
+t/IO-SigGuard_sysread_normal_error.t
 t/IO-SigGuard_syswrite.t
+t/IO-SigGuard_syswrite_normal_error.t
