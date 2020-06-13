@@ -1,6 +1,6 @@
 Revision history for Perl module IO::SigGuard
 
-0.15
+0.15 Sat Jun 13 2020
 - Fix errant error reporting.
 
 0.14 Sun Dec 23 2018
